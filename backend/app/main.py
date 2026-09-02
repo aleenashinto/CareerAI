@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
@@ -13,8 +13,11 @@ from app.models.multitenant_models import *
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Database init warning (safe in serverless): {e}")
     yield
 
 app = FastAPI(
@@ -36,6 +39,7 @@ app.include_router(multitenant_router, prefix=settings.API_V1_STR)
 app.include_router(career_brain_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 
+@app.get("/")
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "CareerAI Engine", "version": "2.0.0"}
