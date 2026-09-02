@@ -1,4 +1,5 @@
-﻿const API_BASE = 'http://localhost:8000/api/v1';
+// In production on Vercel, requests to /api/v1 are handled on the same domain
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000/api/v1' : '/api/v1';
 
 export interface CandidateProfile {
   id: number;
